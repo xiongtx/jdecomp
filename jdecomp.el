@@ -63,6 +63,14 @@
 
 
 ;;;; Utilities
+
+(defvar jdecomp--jar-mime-types
+  '("application/java-archive"
+    "application/x-jar"
+    "application/x-java-archive"
+    "application/zip")
+  "MIME types for JAR files.")
+
 (defun jdecomp--jar-p (file)
   "Return t if FILE is a JAR."
   (ignore-errors
@@ -70,7 +78,7 @@
                          (process-file "file" nil standard-output nil
                                        "-bL" "--mime-type"
                                        (expand-file-name file)))))
-      (string= "application/java-archive" (string-trim type-output)))))
+      (member (string-trim type-output) jdecomp--jar-mime-types))))
 
 (defun jdecomp--classfile-p (file)
   "Return t if FILE is a Java class file."
