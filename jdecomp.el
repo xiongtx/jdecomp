@@ -150,7 +150,7 @@ Normalization example:
    (\"--foo-opt foo\" \"--bar-opt\" \"bar\")
 => (\"--foo-opt\" \"foo\" \"--bar-opt\" \"bar\")"
   (let ((options (assoc-default decompiler-type jdecomp-decompiler-options)))
-    (split-string (string-join options " ") " ")))
+    (cl-remove-if #'string-empty-p (split-string (string-join options " ") " "))))
 
 (cl-defun jdecomp--decompile-command (&optional (decompiler-type jdecomp-decompiler-type))
   "Return the decompile command.
