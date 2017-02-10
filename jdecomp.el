@@ -136,7 +136,7 @@ saved to a temp dir."
 
 (defun jdecomp--decompiled-buffer-name (file)
   "Return the buffer name of decompiled FILE."
-  (format "*Decompiled %s*" (file-name-nondirectory file)))
+  (format "*Decompiled %s (%s)*" (file-name-nondirectory file) jdecomp-decompiler-type))
 
 (defun jdecomp--decompiler-path (decompiler-type)
   "Return path for DECOMPILER-TYPE from `jdecomp-decompiler-paths'."
@@ -228,6 +228,11 @@ FILE must be a Java classfile."
       (jdecomp--fernflower-decompile-file-in-jar file jar)
     (jdecomp--fernflower-decompile-file file)))
 
+(defun jdecomp--preview-mode-update-modeline ()
+  "Update mode line for `jdecomp-preview-mode'.
+
+Intended for use as `:after-hook' form."
+  (setq mode-name (format "JDecomp/%s" jdecomp-decompiler-type)))
 
 ;;;; API
 
@@ -240,10 +245,11 @@ FILE must be a Java classfile."
   "Keymap for decompiled Java class file buffers.")
 
 ;;;###autoload
-(define-derived-mode jdecomp-preview-mode java-mode "JDecomp/preview"
+(define-derived-mode jdecomp-preview-mode java-mode ""
   "Major mode for previewing decompiled Java class files.
 
-\\{jdecomp-preview-mode-map}")
+\\{jdecomp-preview-mode-map}"
+  :after-hook (jdecomp--preview-mode-update-modeline))
 
 ;;;###autoload
 (defun jdecomp-decompile (file &optional jar)
