@@ -1,0 +1,79 @@
+[[http://www.gnu.org/licenses/gpl-3.0.txt][file:https://img.shields.io/badge/license-GPLv3-blue.svg]]
+
+* JDecomp
+
+** Introduction
+
+=jdecomp= provides an interface to various Java decompilers. The current supported decompilers are:
+
+- [[http://www.benf.org/other/cfr/][CFR]]
+- [[https://github.com/JetBrains/intellij-community/tree/master/plugins/java-decompiler/engine][Fernflower]]
+
+** Installation
+
+Install via [[https://melpa.org/#/][MELPA]].
+
+For general information on installing Emacs packages, see the [[https://www.emacswiki.org/emacs/InstallingPackages][Emacs Wiki]].
+
+** Setup
+
+In your init file, add the following to activate =jdecomp-mode=:
+
+#+BEGIN_SRC emacs-lisp
+  (jdecomp-mode 1)
+#+END_SRC
+
+Set customizable variable ~jdecomp-decompiler-type~ to a known decompiler type:
+
+- ~cfr~ (default)
+- ~fernflower~
+
+E.g.
+
+#+BEGIN_SRC emacs-lisp
+  (customize-set-variable 'jdecomp-decompiler-type 'fernflower)
+#+END_SRC
+
+Set customizable variable ~jdecomp-decompiler-paths~ to decompiler paths. E.g.
+
+#+BEGIN_SRC emacs-lisp
+  (customize-set-variable 'jdecomp-decompiler-paths
+                          '((cfr . "~/Downloads/cfr_0_118.jar")
+                            (fernflower . "~/idea-IC-162.1628.40/plugins/java-decompiler/lib/java-decompiler.jar")))
+#+END_SRC
+
+Use =M-x jdecomp-mode= to turn the minor mode off, or call
+
+#+BEGIN_SRC emacs-lisp
+  (jdecomp-mode -1)
+#+END_SRC
+
+** Features
+
+*** Decompile classfiles
+
+When =jdecomp-mode= is active, opening a [[https://en.wikipedia.org/wiki/Java_class_file][Java classfile]] (including those in JARs) automatically decompiles the file and displays the result in a preview buffer.
+
+** Options
+
+Set customizable variable ~jdecomp-decompiler-options~ to options for decompilers. E.g.
+
+#+BEGIN_SRC emacs-lisp
+  (customize-set-variable 'jdecomp-decompiler-options
+                          '((cfr "--comments false" "--removeboilerplate false")
+                            (fernflower "-hes=0" "-hdc=0")))
+#+END_SRC
+
+** Future work
+
+Support more decompilers:
+
+- [[https://bitbucket.org/mstrobel/procyon][Procyon]]
+- [[https://github.com/nviennot/jd-core-java][JD-Core]]
+- [[https://github.com/Storyyeller/Krakatau][Krakatau]] (Python)
+
+Maybe [[others]]?
+
+** Other
+
+This package is inspired by [[https://github.com/gbalats/autodisass-java-bytecode][autodisass-java-bytecode]].

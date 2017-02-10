@@ -1,0 +1,2 @@
+# Include .class files as test sources
+!*.class
