@@ -233,6 +233,14 @@ FILE must be a Java classfile."
 
 Intended for use as `:after-hook' form."
   (setq mode-name (format "JDecomp/%s" jdecomp-decompiler-type)))
+
+(defun jdecomp--preview-mode-revert-buffer (_ignore-auto noconfirm)
+  "Function to revert buffer for `jdecomp-preview-mode'."
+  (when (or noconfirm (yes-or-no-p (format "Decompile again with %s? " jdecomp-decompiler-type)))
+    (let ((pos (point)))
+      (jdecomp-decompile-and-view buffer-file-name jdecomp--preview-mode-jar-file)
+      (goto-char pos))))
+
 
 ;;;; API
 
@@ -249,7 +257,8 @@ Intended for use as `:after-hook' form."
   "Major mode for previewing decompiled Java class files.
 
 \\{jdecomp-preview-mode-map}"
-  :after-hook (jdecomp--preview-mode-update-modeline))
+  :after-hook (jdecomp--preview-mode-update-modeline)
+  (setq-local revert-buffer-function #'jdecomp--preview-mode-revert-buffer))
 
 ;;;###autoload
 (defun jdecomp-decompile (file &optional jar)
@@ -268,14 +277,13 @@ in."
     (with-current-buffer buf
       (let ((inhibit-read-only t))
         (erase-buffer)
-        (insert result)
-        (setq default-directory (file-name-directory (or jar file)))
-        (setq buffer-file-name (if jar
-                                   (concat jar ":" file)
-                                 file)))
+        (insert result))
       (setq buffer-read-only t)
+      (setq default-directory (file-name-directory (or jar file)))
+      (setq buffer-file-name file)
       (goto-char (point-min))
       (jdecomp-preview-mode)
+      (setq-local jdecomp--preview-mode-jar-file jar)
       (set-buffer-modified-p nil))
     buf))
 
