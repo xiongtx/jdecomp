@@ -65,13 +65,12 @@
 ;;;; Utilities
 (defun jdecomp--jar-p (file)
   "Return t if FILE is a JAR."
-  (condition-case nil
-      (string= "application/java-archive"
-               (string-trim
-                (with-output-to-string
-                  (process-file "file" nil standard-output nil
-                                "-bL" "--mime-type" (expand-file-name file)))))
-    (error nil)))
+  (ignore-errors
+    (let ((type-output (with-output-to-string
+                         (process-file "file" nil standard-output nil
+                                       "-bL" "--mime-type"
+                                       (expand-file-name file)))))
+      (string= "application/java-archive" (string-trim type-output)))))
 
 (defun jdecomp--classfile-p (file)
   "Return t if FILE is a Java class file."
