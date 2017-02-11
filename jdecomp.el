@@ -90,29 +90,37 @@
 
 (defun jdecomp--make-temp-file (prefix &optional dir-flag suffix)
   "Like `make-temp-file', but creates parent dirs as necessary."
-  (with-file-modes ?\700
-    (let (file)
-      (while (condition-case ()
-                 (progn
-                   (setq file
-                         (make-temp-name
-                          (if (zerop (length prefix))
-                              (file-name-as-directory
-                               temporary-file-directory)
-                            (expand-file-name prefix
-                                              temporary-file-directory))))
-                   (if suffix
-                       (setq file (concat file suffix)))
-                   (if dir-flag
-                       ;; All `make-temp-file' is missing here is a `t'
-                       (make-directory file t)
-                     (write-region "" nil file nil 'silent nil 'excl))
-                   nil)
-               (file-already-exists t))
-        ;; the file was somehow created by someone else between
-        ;; `make-temp-name' and `write-region', let's try again.
-        nil)
-      file)))
+  (let ((umask (default-file-modes))
+        file)
+    (unwind-protect
+        (progn
+          ;; Create temp files with strict access rights.  It's easy to
+          ;; loosen them later, whereas it's impossible to close the
+          ;; time-window of loose permissions otherwise.
+          (set-default-file-modes ?\700)
+          (while (condition-case ()
+                     (progn
+                       (setq file
+                             (make-temp-name
+                              (if (zerop (length prefix))
+                                  (file-name-as-directory
+                                   temporary-file-directory)
+                                (expand-file-name prefix
+                                                  temporary-file-directory))))
+                       (if suffix
+                           (setq file (concat file suffix)))
+                       (if dir-flag
+                           ;; All `make-temp-file' is missing here is a `t'
+                           (make-directory file t)
+                         (write-region "" nil file nil 'silent nil 'excl))
+                       nil)
+                   (file-already-exists t))
+            ;; the file was somehow created by someone else between
+            ;; `make-temp-name' and `write-region', let's try again.
+            nil)
+          file)
+      ;; Reset the umask.
+      (set-default-file-modes umask))))
 
 ;; From: http://emacs.stackexchange.com/a/3843/10269
 (defun jdecomp---extract-to-file (jar file)
@@ -296,8 +304,9 @@ FILE must be a Java class file.
 If called interactively, FILE is the name of the file the current
 buffer is visiting."
   (interactive (list (buffer-file-name)))
-  (when-let ((buf (jdecomp-decompile file jar)))
-    (switch-to-buffer buf)))
+  (let ((buf (jdecomp-decompile file jar)))
+    (when buf
+      (switch-to-buffer buf))))
 
 
 ;;;; Minor mode
