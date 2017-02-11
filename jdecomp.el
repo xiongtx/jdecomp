@@ -29,6 +29,7 @@
 
 ;;; Code:
 
+(require 'arc-mode)
 (require 'cl-lib)
 (require 'subr-x)
 
@@ -89,7 +90,9 @@
   (directory-files dir t "\\.java\\'"))
 
 (defun jdecomp--make-temp-file (prefix &optional dir-flag suffix)
-  "Like `make-temp-file', but creates parent dirs as necessary."
+  "Like `make-temp-file', but create parent dirs as necessary.
+
+PREFIX, DIR-FLAG, and SUFFIX are as in `make-temp-file'."
   (let ((umask (default-file-modes))
         file)
     (unwind-protect
@@ -126,7 +129,7 @@
 (defun jdecomp---extract-to-file (jar file)
   "Return path of extracted FILE.
 
-FILE is extracted from JAR using COMMAND. The extracted file is
+FILE is extracted from JAR using COMMAND.  The extracted file is
 saved to a temp dir."
   (let* ((command archive-zip-extract)
          (output-dir (jdecomp--make-temp-file (concat "jdecomp" "/" (file-name-sans-extension file)) t))
@@ -186,7 +189,10 @@ Optional parameter DECOMPILER-TYPE defaults to
 (defun jdecomp--cfr-command (file &optional jar)
   "Decompile FILE with CFR and return result as string.
 
-FILE must be a Java classfile."
+FILE must be a Java classfile.
+
+Optional parameter JAR is the JAR file containing FILE, if
+applicable."
   (jdecomp--ensure-decompiler 'cfr)
   (with-output-to-string
     (let ((classpath (or jar (file-name-directory file) default-directory)))
@@ -224,14 +230,20 @@ was extracted from a JAR with `jdecomp--extract-to-file'."
 (defun jdecomp--fernflower-decompile-file-in-jar (file jar)
   "Decompile FILE with Fernflower and return result as string.
 
-FILE must be a Java classfile."
+FILE must be a Java classfile.
+
+Optional parameter JAR is the JAR file containing FILE, if
+applicable."
   (let ((extracted-file (jdecomp---extract-to-file jar file)))
     (jdecomp--fernflower-decompile-file extracted-file t)))
 
 (defun jdecomp--fernflower-command (file &optional jar)
   "Decompile FILE with Fernflower and return result as string.
 
-FILE must be a Java classfile."
+FILE must be a Java classfile.
+
+Optional parameter JAR is the JAR file containing FILE, if
+applicable."
   (if jar
       (jdecomp--fernflower-decompile-file-in-jar file jar)
     (jdecomp--fernflower-decompile-file file)))
@@ -243,7 +255,9 @@ Intended for use as `:after-hook' form."
   (setq mode-name (format "JDecomp/%s" jdecomp-decompiler-type)))
 
 (defun jdecomp--preview-mode-revert-buffer (_ignore-auto noconfirm)
-  "Function to revert buffer for `jdecomp-preview-mode'."
+  "Function to revert buffer for `jdecomp-preview-mode'.
+
+NOCONFIRM is as in `revert-buffer'."
   (when (or noconfirm (yes-or-no-p (format "Decompile again with %s? " jdecomp-decompiler-type)))
     (let ((pos (point)))
       (jdecomp-decompile-and-view buffer-file-name jdecomp--preview-mode-jar-file)
@@ -299,10 +313,11 @@ in."
 (defun jdecomp-decompile-and-view (file &optional jar)
   "Decompile FILE and view buffer of decompiled contents.
 
-FILE must be a Java class file.
+FILE must be a Java class file.  If called interactively, FILE is
+the name of the file the current buffer is visiting.
 
-If called interactively, FILE is the name of the file the current
-buffer is visiting."
+Optional parameter JAR is the JAR file containing FILE, if
+applicable."
   (interactive (list (buffer-file-name)))
   (let ((buf (jdecomp-decompile file jar)))
     (when buf
@@ -310,20 +325,6 @@ buffer is visiting."
 
 
 ;;;; Minor mode
-
-(defun jdecomp-hook-function ()
-  (let ((file (buffer-file-name)))
-    (when (and jdecomp-mode
-               (jdecomp--classfile-p file))
-      (kill-buffer (current-buffer))
-      (jdecomp-decompile-and-view file))))
-
-(defun jdecomp-archive-hook-function ()
-  (pcase-let ((`(,jar ,file) (split-string (buffer-file-name) ":")))
-    (when (and jdecomp-mode
-               (jdecomp--classfile-p file))
-      (kill-buffer (current-buffer))
-      (jdecomp-decompile-and-view file jar))))
 
 ;;;###autoload
 (define-minor-mode jdecomp-mode
@@ -335,6 +336,22 @@ buffer is visiting."
         (add-hook 'archive-extract-hook #'jdecomp-archive-hook-function))
     (remove-hook 'find-file-hook #'jdecomp-hook-function)
     (remove-hook 'archive-extract-hook #'jdecomp-archive-hook-function)))
+
+(defun jdecomp-hook-function ()
+  "Hook function for decompiling classfiles."
+  (let ((file (buffer-file-name)))
+    (when (and jdecomp-mode
+               (jdecomp--classfile-p file))
+      (kill-buffer (current-buffer))
+      (jdecomp-decompile-and-view file))))
+
+(defun jdecomp-archive-hook-function ()
+  "Hook function for decompiling extracted classfiles."
+  (pcase-let ((`(,jar ,file) (split-string (buffer-file-name) ":")))
+    (when (and jdecomp-mode
+               (jdecomp--classfile-p file))
+      (kill-buffer (current-buffer))
+      (jdecomp-decompile-and-view file jar))))
 
 
 (provide 'jdecomp)
