@@ -72,6 +72,8 @@
     "application/zip")
   "MIME types for JAR files.")
 
+(defvar jdecomp--preview-mode-jar-file)
+
 (defun jdecomp--jar-p (file)
   "Return t if FILE is a JAR."
   (ignore-errors
@@ -174,7 +176,7 @@ Optional parameter DECOMPILER-TYPE defaults to
         ('fernflower #'jdecomp--fernflower-command))
     (error (user-error "%s is not a known decompiler" decompiler-type))))
 
-(cl-defun jdecomp--ensure-decompiler (&optional decompiler-type jdecomp-decompiler-type)
+(cl-defun jdecomp--ensure-decompiler (&optional (decompiler-type jdecomp-decompiler-type))
   "Ensure that the decompiler for DECOMPILER-TYPE is available.
 
 Optional parameter DECOMPILER-TYPE defaults to
