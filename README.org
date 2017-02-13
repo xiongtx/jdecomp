@@ -1,3 +1,4 @@
+[[https://melpa.org/#/jdecomp][file:https://melpa.org/packages/jdecomp-badge.svg]]
 [[http://www.gnu.org/licenses/gpl-3.0.txt][file:https://img.shields.io/badge/license-GPLv3-blue.svg]]
 
 * JDecomp
