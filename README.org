@@ -9,6 +9,7 @@
 
 - [[http://www.benf.org/other/cfr/][CFR]]
 - [[https://github.com/JetBrains/intellij-community/tree/master/plugins/java-decompiler/engine][Fernflower]]
+- [[https://bitbucket.org/mstrobel/procyon][Procyon]]
 
 ** Installation
 
@@ -28,6 +29,7 @@ Set customizable variable ~jdecomp-decompiler-type~ to a known decompiler type:
 
 - ~cfr~ (default)
 - ~fernflower~
+- ~procyon~
 
 E.g.
 
@@ -40,7 +42,8 @@ Set customizable variable ~jdecomp-decompiler-paths~ to decompiler paths. E.g.
 #+BEGIN_SRC emacs-lisp
   (customize-set-variable 'jdecomp-decompiler-paths
                           '((cfr . "~/Downloads/cfr_0_118.jar")
-                            (fernflower . "~/idea-IC-162.1628.40/plugins/java-decompiler/lib/java-decompiler.jar")))
+                            (fernflower . "~/idea-IC-162.1628.40/plugins/java-decompiler/lib/java-decompiler.jar")
+                            (procyon . "~/procyon-decompiler-0.5.30.jar")))
 #+END_SRC
 
 Use =M-x jdecomp-mode= to turn the minor mode off, or call
@@ -69,7 +72,6 @@ Set customizable variable ~jdecomp-decompiler-options~ to options for decompiler
 
 Support more decompilers:
 
-- [[https://bitbucket.org/mstrobel/procyon][Procyon]]
 - [[https://github.com/nviennot/jd-core-java][JD-Core]]
 - [[https://github.com/Storyyeller/Krakatau][Krakatau]] (Python)
 
