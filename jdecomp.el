@@ -48,18 +48,19 @@
   :group 'jdecomp
   :type '(radio
           (const :tag "CFR" 'cfr)
-          (const :tag "Fernflower" 'fernflower)))
+          (const :tag "Fernflower" 'fernflower)
+          (const :tag "Procyon" 'procyon)))
 
 (defcustom jdecomp-decompiler-paths nil
   "Alist of Java decompiler types and their paths."
   :group 'jdecomp
-  :options '(cfr fernflower)
+  :options '(cfr fernflower procyon)
   :type '(alist :key-type symbol :value-type (file :must-match t)))
 
 (defcustom jdecomp-decompiler-options nil
   "Alist of Java decompiler command line options."
   :group 'jdecomp
-  :options '(cfr fernflower)
+  :options '(cfr fernflower procyon)
   :type '(alist :key-type symbol :value-type (repeat string)))
 
 
